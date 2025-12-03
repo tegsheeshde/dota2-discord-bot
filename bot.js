@@ -89,7 +89,7 @@ function sanitizeFirebaseKey(key) {
 }
 
 // Bot ready event (updated to use clientReady for Discord.js v14+)
-client.once('ready', async () => {
+client.once('clientReady', async () => {
   console.log('✅ Discord bot is online!');
   console.log(`📝 Logged in as: ${client.user.tag}`);
   console.log(`🔗 Monitoring channel ID: ${CHANNEL_ID}`);
