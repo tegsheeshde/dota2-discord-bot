@@ -161,6 +161,8 @@ function startVoiceChannelMonitoring() {
               selfVideo: voiceState?.selfVideo || false, // Camera on/off
               selfMute: voiceState?.selfMute || false,   // Muted
               selfDeaf: voiceState?.selfDeaf || false,   // Deafened
+              guildId: GUILD_ID,                         // For Discord link
+              channelId: channel.id,                     // For Discord link
             };
           });
         }
