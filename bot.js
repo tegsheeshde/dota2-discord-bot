@@ -26,6 +26,7 @@ let credential;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
   // Cloud deployment: use base64 encoded service account
+  console.log('🔑 Using Firebase credentials from environment variable');
   const serviceAccountJson = Buffer.from(
     process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
     'base64'
@@ -34,8 +35,16 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
   credential = admin.credential.cert(serviceAccount);
 } else {
   // Local development: use service account file
-  const serviceAccount = require('./firebase-service-account.json');
-  credential = admin.credential.cert(serviceAccount);
+  console.log('🔑 Using Firebase credentials from local file');
+  try {
+    const serviceAccount = require('./firebase-service-account.json');
+    credential = admin.credential.cert(serviceAccount);
+  } catch (error) {
+    console.error('❌ ERROR: Firebase credentials not found!');
+    console.error('Please set FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable');
+    console.error('See DEPLOY_CHECKLIST.md for instructions');
+    process.exit(1);
+  }
 }
 
 admin.initializeApp({
