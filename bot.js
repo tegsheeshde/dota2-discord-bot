@@ -24,18 +24,32 @@ const client = new Client({
 // Support both local file and environment variable (for cloud deployment)
 let credential;
 
+// Debug: Check environment variables
+console.log('🔍 Checking Firebase credentials...');
+console.log('Environment check:', {
+  hasBase64: !!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
+  base64Length: process.env.FIREBASE_SERVICE_ACCOUNT_BASE64?.length || 0,
+  nodeEnv: process.env.NODE_ENV,
+});
+
 if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
   // Cloud deployment: use base64 encoded service account
   console.log('🔑 Using Firebase credentials from environment variable');
-  const serviceAccountJson = Buffer.from(
-    process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
-    'base64'
-  ).toString('utf8');
-  const serviceAccount = JSON.parse(serviceAccountJson);
-  credential = admin.credential.cert(serviceAccount);
+  try {
+    const serviceAccountJson = Buffer.from(
+      process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
+      'base64'
+    ).toString('utf8');
+    const serviceAccount = JSON.parse(serviceAccountJson);
+    credential = admin.credential.cert(serviceAccount);
+    console.log('✅ Firebase credentials loaded successfully from base64');
+  } catch (error) {
+    console.error('❌ ERROR parsing base64 credentials:', error.message);
+    process.exit(1);
+  }
 } else {
   // Local development: use service account file
-  console.log('🔑 Using Firebase credentials from local file');
+  console.log('🔑 Attempting to use Firebase credentials from local file');
   const fs = require('fs');
   const path = require('path');
   const serviceAccountPath = path.join(__dirname, 'firebase-service-account.json');
@@ -43,8 +57,10 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
   if (fs.existsSync(serviceAccountPath)) {
     const serviceAccount = require('./firebase-service-account.json');
     credential = admin.credential.cert(serviceAccount);
+    console.log('✅ Firebase credentials loaded successfully from file');
   } else {
     console.error('❌ ERROR: Firebase credentials not found!');
+    console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('FIREBASE')));
     console.error('Please either:');
     console.error('1. Add firebase-service-account.json file locally, OR');
     console.error('2. Set FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable');
