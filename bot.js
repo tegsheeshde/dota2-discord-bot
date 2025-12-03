@@ -36,12 +36,18 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
 } else {
   // Local development: use service account file
   console.log('🔑 Using Firebase credentials from local file');
-  try {
+  const fs = require('fs');
+  const path = require('path');
+  const serviceAccountPath = path.join(__dirname, 'firebase-service-account.json');
+
+  if (fs.existsSync(serviceAccountPath)) {
     const serviceAccount = require('./firebase-service-account.json');
     credential = admin.credential.cert(serviceAccount);
-  } catch (error) {
+  } else {
     console.error('❌ ERROR: Firebase credentials not found!');
-    console.error('Please set FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable');
+    console.error('Please either:');
+    console.error('1. Add firebase-service-account.json file locally, OR');
+    console.error('2. Set FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable');
     console.error('See DEPLOY_CHECKLIST.md for instructions');
     process.exit(1);
   }
